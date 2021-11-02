@@ -13,10 +13,15 @@ function main() { // oh no is c language
     canvas.width = _width;
     canvas.height = _height;
     canvas.style.border = "1px solid #000";
+
+    ctx = canvas.getContext("2d");
+    document.body.appendChild(canvas);
+
+    document.addEventListener("mousedown", onClick);
 }
 
 function onClick() {
-
+    alert('you clicked')
 }
 
 function setup() {

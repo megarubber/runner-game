@@ -47,6 +47,14 @@ class Element {
     setHeight(height) {
         this.height = height; 
     }
+
+    getColor() {
+        return this.color;
+    }
+
+    setColor(color) {
+        this.color = color;
+    }
 }
 
 class Block extends Element {
@@ -59,13 +67,13 @@ class Block extends Element {
     }
 
     updateGravity() {
-        this.setSpeed(this.getSpeed() += this.getGravity())
-        this.setY(this.getY() += this.getSpeed());
+        this.setSpeed(this.getSpeed() + this.getGravity());
+        this.setY(this.getY() + this.getSpeed());
     }
 
     isGrounded(ground) {
         if(this.getY() > ground.getY() - this.getHeight()) {
-            this.getY() = ground.y - this.getHeight();
+            this.setY(ground.y - this.getHeight());
             this.setNumJumps(0);
         }
     }
@@ -73,7 +81,7 @@ class Block extends Element {
     jump() {
         if(this.getNumJumps() < maxJumps) {
             this.setSpeed(-this.getJumpForce());
-            this.setNumJumps(this.getNumJumps()++);
+            this.setNumJumps(this.getNumJumps() + 1);
         }
     }
     
@@ -121,8 +129,8 @@ class ObstacleSpawner {
         const newX = mainWidth;
         const newWidth = 30 + Math.floor(21 * Math.random());
         const newHeight = 30 + Math.floor(120 * Math.random());
-        const newColor = colors[Math.floor(5 * Math.random)];
-        let obstacle = new Element(newX, this.ground - newHeight, newWidth, newHeight, newColor);
+        const newColor = colors[Math.floor(colors.length * Math.random())];
+        let obstacle = new Element(newX, this.getGround().y - newHeight, newWidth, newHeight, newColor);
         this.getAllObstacles().push(obstacle);
         this.setSpawnDelay(30 + Math.floor(21 * Math.random()));
     }
@@ -138,11 +146,11 @@ class ObstacleSpawner {
         if(this.getSpawnDelay() == 0)
             this.spawnNewObstacle();
         else
-            this.setSpawnDelay(this.getSpawnDelay()--);
+            this.setSpawnDelay(this.getSpawnDelay() - 1);
         
         for(let i = 0, len = this.getAllObstacles().length; i < len; i++) {
             let o = this.getSpecificObstacle(i);
-            o.setX(x - speedBackground);
+            o.setX(o.getX() - speedBackground);
             if(o.getX() <= o.getWidth()) {
                 this.getAllObstacles().splice(i, 1);
                 len--;
@@ -229,7 +237,7 @@ function update() {
     _frames++;
     player.updateGravity();
     player.isGrounded(ground);
-    //spawner.updateEachObstacle();
+    spawner.updateEachObstacle();
 }
 
 function draw() {
@@ -238,7 +246,7 @@ function draw() {
 
     ground.drawElement();
     player.drawElement();
-    //spawner.drawNewObstacle();
+    spawner.drawNewObstacle();
 }
 
 main();

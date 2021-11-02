@@ -1,28 +1,30 @@
-var canvas, ctx, _height, _width, _frames = 0;
+var canvas, ctx, mainHeight = window.innerHeight, mainWidth = window.innerWidth, _frames = 0;
 
-ground = {
-    _y : 550,
-    _height : 50,
-    _color : '#ffdf70',
-
-    drawGround : function() {
-        ctx.fillStyle = this._color;
-        ctx.fillRect(0, this._y, _width, this._height);
+class FixedElement {
+    constructor(x, y, height, width, color) {
+        this.x = x;
+        this.y = y;
+        this.height = height;
+        this.width = width;
+        this.color = color;
     }
-};
+
+    drawElement() {
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+    }
+}
+
+getMainDimensions();
+
+let ground = new FixedElement(0, 550, 50, mainWidth, '#ffdf70');
 
 function main() { // oh no is c language
-    _height = window.innerHeight;
-    _width = window.innerWidth;
+    getMainDimensions();
 
-    if(_width >= 500) {
-        _width = 600;
-        _height = 600;
-    }
-
-    canvas = document.createElement("canvas");
-    canvas.width = _width;
-    canvas.height = _height;
+    canvas = document.createElement('canvas');
+    canvas.width = mainWidth;
+    canvas.height = mainHeight;
     canvas.style.border = "1px solid #000";
 
     ctx = canvas.getContext('2d');
@@ -35,6 +37,16 @@ function main() { // oh no is c language
 
 function onClick() {
     alert('you clicked')
+}
+
+function getMainDimensions() {
+    mainHeight = window.innerHeight;
+    mainWidth = window.innerWidth;
+
+    if(mainHeight >= 500) {
+        mainWidth = 600;
+        mainHeight = 600;
+    }
 }
 
 function setup() {
@@ -50,9 +62,9 @@ function update() {
 
 function draw() {
     ctx.fillStyle = '#50beff';
-    ctx.fillRect(0, 0, _width, _height);
+    ctx.fillRect(0, 0, mainWidth, mainHeight);
 
-    ground.drawGround();
+    ground.drawElement();
 }
 
 main();

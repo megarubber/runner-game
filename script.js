@@ -130,9 +130,9 @@ class ObstacleSpawner {
         const newWidth = 30 + Math.floor(21 * Math.random());
         const newHeight = 30 + Math.floor(120 * Math.random());
         const newColor = colors[Math.floor(colors.length * Math.random())];
-        let obstacle = new Element(newX, this.getGround().y - newHeight, newWidth, newHeight, newColor);
+        let obstacle = new Element(newX, this.getGround().y - newHeight, newHeight, newWidth, newColor);
         this.getAllObstacles().push(obstacle);
-        this.setSpawnDelay(30 + Math.floor(21 * Math.random()));
+        this.setSpawnDelay(Math.floor(Math.random() * 60) + 40);
     }
 
     drawNewObstacle() {
@@ -151,7 +151,7 @@ class ObstacleSpawner {
         for(let i = 0, len = this.getAllObstacles().length; i < len; i++) {
             let o = this.getSpecificObstacle(i);
             o.setX(o.getX() - speedBackground);
-            if(o.getX() <= o.getWidth()) {
+            if(o.getX() <= -o.getWidth()) {
                 this.getAllObstacles().splice(i, 1);
                 len--;
                 i--;
@@ -191,7 +191,7 @@ class ObstacleSpawner {
 getMainDimensions();
 
 let ground = new Element(0, 550, 50, mainWidth, '#ffdf70');
-let player = new Block(50, 0, 50, 50, '#ff4e4e', 1.5, 0, 15);
+let player = new Block(50, 0, 50, 50, '#ff4e4e', 1.5, 0, 18);
 let spawner = new ObstacleSpawner(ground);
 /* All game functions */
 

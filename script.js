@@ -1,6 +1,6 @@
 let canvas, ctx, mainHeight = window.innerHeight, mainWidth = window.innerWidth, _frames = 0;
-const maxJumps = 3;
-
+const maxJumps = 3, speedBackground = 6;
+const colors = ['#ffbc1c', '#ff1c1c', '#ff85e1', '#52a7ff', '#78ff5d'];
 
 class Element {
     constructor(x, y, height, width, color) {
@@ -15,6 +15,38 @@ class Element {
         ctx.fillStyle = this.color;
         ctx.fillRect(this.x, this.y, this.width, this.height);
     }
+
+    getX() {
+        return this.x;
+    }
+
+    setX(x) {
+        this.x = x; 
+    }
+
+    getY() {
+        return this.y;
+    }
+
+    setY(y) {
+        this.y = y; 
+    }
+
+    getWidth() {
+        return this.width;
+    }
+
+    setWidth(width) {
+        this.width = width; 
+    }
+
+    getHeight() {
+        return this.height;
+    }
+
+    setHeight(height) {
+        this.height = height; 
+    }
 }
 
 class Block extends Element {
@@ -27,22 +59,119 @@ class Block extends Element {
     }
 
     updateGravity() {
-        this.speed += this.gravity;
-        this.y += this.speed;
+        this.setSpeed(this.getSpeed() += this.getGravity())
+        this.setY(this.getY() += this.getSpeed());
     }
 
     isGrounded(ground) {
-        if(this.y > ground.y - this.height) {
-            this.y = ground.y - this.height;
-            this.numJumps = 0;
+        if(this.getY() > ground.getY() - this.getHeight()) {
+            this.getY() = ground.y - this.getHeight();
+            this.setNumJumps(0);
         }
     }
 
     jump() {
-        if(this.numJumps < maxJumps) {
-            this.speed = -this.jumpForce;
-            this.numJumps++;
+        if(this.getNumJumps() < maxJumps) {
+            this.setSpeed(-this.getJumpForce());
+            this.setNumJumps(this.getNumJumps()++);
         }
+    }
+    
+    getSpeed() {
+        return this.speed;
+    }
+
+    setSpeed(speed) {
+        this.speed = speed;
+    }
+
+    getGravity() {
+        return this.gravity;
+    }
+
+    setGravity(gravity) {
+        this.gravity = gravity;
+    }
+
+    getJumpForce() {
+        return this.jumpForce;
+    }
+
+    setJumpForce(jumpForce) {
+        this.jumpForce = jumpForce;
+    }
+
+    getNumJumps() {
+        return this.numJumps;
+    }
+
+    setNumJumps(numJumps) {
+        this.numJumps = numJumps;
+    }   
+}
+
+class ObstacleSpawner {
+    constructor(ground) {
+        this.allObstacles = [];
+        this.ground = ground;
+        this.spawnDelay = 0;
+    }
+
+    newObstacle() {
+        const newX = mainWidth;
+        const newWidth = 30 + Math.floor(21 * Math.random());
+        const newHeight = 30 + Math.floor(120 * Math.random());
+        const newColor = colors[Math.floor(5 * Math.random)];
+        let obstacle = new Element(newX, this.ground - newHeight, newWidth, newHeight, newColor);
+        this.getAllObstacles().push(obstacle);
+    }
+
+    drawNewObstacle() {
+        for(let i = 0, len = this.getAllObstacles().length; i < len; i++) {
+            let o = this.getSpecificObstacle(i);
+            o.drawElement();
+        }
+    }
+
+    updateEachObstacle() {
+        if(this.spawnDelay)
+        for(let i = 0, len = this.getAllObstacles().length; i < len; i++) {
+            let o = this.getSpecificObstacle(i);
+            o.setX(x - speedBackground);
+            if(o.getX() <= o.getWidth()) {
+                this.getAllObstacles().splice(i, 1);
+                len--;
+                i--;
+            }
+        }
+    }
+
+    getSpecificObstacle(index) {
+        return this.allObstacles[index];
+    }
+
+    getAllObstacles() {
+        return this.allObstacles;
+    }
+
+    setSpecificObstacle(index, obstacle) {
+        this.allObstacles[index] = obstacle;
+    }
+
+    getSpawnDelay() {
+        return this.spawnDelay;
+    }
+
+    setSpawnDelay(spawnDelay) {
+        this.spawnDelay = spawnDelay;
+    }
+
+    getGround(){
+        return this.ground;
+    }
+
+    setGround(ground) {
+        this.ground = ground;
     }
 }
 

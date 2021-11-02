@@ -1,4 +1,4 @@
-var canvas, ctx, mainHeight = window.innerHeight, mainWidth = window.innerWidth, _frames = 0;
+let canvas, ctx, mainHeight = window.innerHeight, mainWidth = window.innerWidth, _frames = 0;
 
 class Element {
     constructor(x, y, height, width, color) {
@@ -15,9 +15,25 @@ class Element {
     }
 }
 
+class Block extends Element {
+    constructor(x, y, height, width, color) {
+        super(x, y, height, width, color);
+        this.gravity = 1.5;
+        this.speed = 0;
+    }
+
+    updateBlock() {
+        this.speed += this.gravity;
+        this.y += this.speed;
+    }
+}
+
 getMainDimensions();
 
 let ground = new Element(0, 550, 50, mainWidth, '#ffdf70');
+let player = new Block(50, 0, 50, 50, '#ff4e4e');
+
+/* All game functions */
 
 function main() { // oh no is c language
     getMainDimensions();
@@ -36,7 +52,7 @@ function main() { // oh no is c language
 }
 
 function onClick() {
-    alert('you clicked')
+    //alert('you clicked')
 }
 
 function getMainDimensions() {
@@ -58,6 +74,7 @@ function setup() {
 
 function update() {
     _frames++;
+    player.updateBlock();
 }
 
 function draw() {
@@ -65,6 +82,7 @@ function draw() {
     ctx.fillRect(0, 0, mainWidth, mainHeight);
 
     ground.drawElement();
+    player.drawElement();
 }
 
 main();

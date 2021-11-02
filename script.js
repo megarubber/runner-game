@@ -12,8 +12,8 @@ class Element {
     }
 
     drawElement() {
-        ctx.fillStyle = this.color;
-        ctx.fillRect(this.x, this.y, this.width, this.height);
+        ctx.fillStyle = this.getColor();
+        ctx.fillRect(this.getX(), this.getY(), this.getWidth(), this.getHeight());
     }
 
     getX() {
@@ -117,13 +117,14 @@ class ObstacleSpawner {
         this.spawnDelay = 0;
     }
 
-    newObstacle() {
+    spawnNewObstacle() {
         const newX = mainWidth;
         const newWidth = 30 + Math.floor(21 * Math.random());
         const newHeight = 30 + Math.floor(120 * Math.random());
         const newColor = colors[Math.floor(5 * Math.random)];
         let obstacle = new Element(newX, this.ground - newHeight, newWidth, newHeight, newColor);
         this.getAllObstacles().push(obstacle);
+        this.setSpawnDelay(30 + Math.floor(21 * Math.random()));
     }
 
     drawNewObstacle() {
@@ -134,7 +135,11 @@ class ObstacleSpawner {
     }
 
     updateEachObstacle() {
-        if(this.spawnDelay)
+        if(this.getSpawnDelay() == 0)
+            this.spawnNewObstacle();
+        else
+            this.setSpawnDelay(this.getSpawnDelay()--);
+        
         for(let i = 0, len = this.getAllObstacles().length; i < len; i++) {
             let o = this.getSpecificObstacle(i);
             o.setX(x - speedBackground);
@@ -179,7 +184,7 @@ getMainDimensions();
 
 let ground = new Element(0, 550, 50, mainWidth, '#ffdf70');
 let player = new Block(50, 0, 50, 50, '#ff4e4e', 1.5, 0, 15);
-
+let spawner = new ObstacleSpawner(ground);
 /* All game functions */
 
 function main() { // oh no is c language
@@ -224,6 +229,7 @@ function update() {
     _frames++;
     player.updateGravity();
     player.isGrounded(ground);
+    //spawner.updateEachObstacle();
 }
 
 function draw() {
@@ -232,6 +238,7 @@ function draw() {
 
     ground.drawElement();
     player.drawElement();
+    //spawner.drawNewObstacle();
 }
 
 main();

@@ -1,6 +1,6 @@
 var canvas, ctx, mainHeight = window.innerHeight, mainWidth = window.innerWidth, _frames = 0;
 
-class FixedElement {
+class Element {
     constructor(x, y, height, width, color) {
         this.x = x;
         this.y = y;
@@ -17,7 +17,7 @@ class FixedElement {
 
 getMainDimensions();
 
-let ground = new FixedElement(0, 550, 50, mainWidth, '#ffdf70');
+let ground = new Element(0, 550, 50, mainWidth, '#ffdf70');
 
 function main() { // oh no is c language
     getMainDimensions();

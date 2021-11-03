@@ -1,14 +1,12 @@
-let canvas, ctx, mainHeight = window.innerHeight, mainWidth = window.innerWidth, _frames = 0, gameState;
+let canvas, ctx, mainHeight = window.innerHeight, mainWidth = window.innerWidth, _frames = 0, gameState, record = 0;
 const maxJumps = 3, speedBackground = 6;
 const colors = ['#ffbc1c', '#ff1c1c', '#ff85e1', '#52a7ff', '#78ff5d'];
 
 /*
-
 gameState variable
 0 == before playing
 1 == during the game
 2 == when the player loses
-
 */
 
 class Element {
@@ -314,35 +312,33 @@ function update() {
     if(gameState == 1) {
         spawner.updateEachObstacle();
         player.collision(spawner);
+        if(player.getScore() > record) record = player.getScore();
     }
 }
 
-function drawState(color) {
-    ctx.fillStyle = color;
-    ctx.fillRect(mainWidth / 2 - 50, mainHeight / 2 - 50, 100, 100);
-}
-
-function drawScore(color, font, x, y) {
+function drawText(color, font, x, y, text) {
     ctx.fillStyle = color;
     ctx.font = font;
-    ctx.fillText(player.getScore(), x, y);
+    ctx.fillText(text, x, y);
 }
 
 function draw() {
     ctx.fillStyle = '#50beff';
     ctx.fillRect(0, 0, mainWidth, mainHeight);
     
-    drawScore('white', '50px Arial', 30, 68);
+    drawText('white', '25px Droid Sans', 30, 70, 'Score: ' + player.getScore());
+    drawText('white', '25px Droid Sans', 30, 120, 'Record Score: ' + record);
 
     switch(gameState) {
         case 0:
-            drawState('green');
+            drawText('green', 'italic normal bolder 25px Droid Sans', mainWidth/2 - 70, mainHeight/2 - 80, 'Runner Game');
+            drawText('green', 'italic normal bolder 25px Droid Sans', mainWidth/2 - 200, mainHeight/2 - 40, 'Press the left mouse button to start');
             break;
         case 1:
             spawner.drawNewObstacle();
             break;
         case 2:
-            drawState('red');
+            drawText('red', 'italic normal bolder 25px Droid Sans', mainWidth/2 - 70, mainHeight/2 - 80, 'Game Over!');
             break;
         default:
             break;

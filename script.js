@@ -1,4 +1,5 @@
-let canvas, ctx, mainHeight = window.innerHeight, mainWidth = window.innerWidth, _frames = 0, gameState, record = 0;
+let canvas, ctx, mainHeight = window.innerHeight, mainWidth = window.innerWidth, _frames = 0;
+let gameState, score = 0, record = 0;
 const maxJumps = 3, speedBackground = 6;
 const colors = ['#ffbc1c', '#ff1c1c', '#ff85e1', '#52a7ff', '#78ff5d'];
 
@@ -73,7 +74,6 @@ class Block extends Element {
         this.numJumps = 0;
         this.ground = ground;
         this.startY = 20;
-        this.score = 0;
 
         if(existScore != false)
             this.existScore = existScore;
@@ -105,22 +105,14 @@ class Block extends Element {
             if(this.getX() < o.getX() + o.getWidth() && this.getX() + this.getWidth() >= o.getX() 
             && this.getY() + this.getHeight() >= this.getGround().getY() - o.getHeight())
                 gameState = 2;
-            else if(o.getX() == 0 && this.getExistScore()) this.setScore(this.getScore() + 1);
+            else if(o.getX() == 0 && this.getExistScore()) score++;
         }
     }
 
     reset() {
         player.setSpeed(0);
         player.setY(this.getStartY());
-        if(this.getExistScore()) this.setScore(0); 
-    }
-
-    getScore() {
-        return this.score;
-    }
-
-    setScore(score) {
-        this.score = score;
+        if(this.getExistScore()) score = 0; 
     }
 
     getExistScore() {
@@ -177,6 +169,8 @@ class ObstacleSpawner {
         this.allObstacles = [];
         this.ground = ground;
         this.spawnDelay = 0;
+        this.min = 70;
+        this.max = 80;
     }
 
     spawnNewObstacle(width) {
@@ -186,7 +180,11 @@ class ObstacleSpawner {
         const newColor = colors[Math.floor(colors.length * Math.random())];
         let obstacle = new Element(newX, this.getGround().getY() - newHeight, newHeight, newWidth, newColor);
         this.getAllObstacles().push(obstacle);
-        this.setSpawnDelay(Math.floor(Math.random() * 60) + 40);
+        this.setSpawnDelay(Math.floor(Math.random() * this.getMax()) + this.getMin());
+        if(score % 20 == 0 && this.getMin() > 20) {
+            this.setMin(this.getMin() - 5);
+            this.setMax(this.getMax() - 2);
+        }
     }
 
     drawNewObstacle() {
@@ -216,6 +214,24 @@ class ObstacleSpawner {
     deleteAll() {
         this.setAllObstacles([]);
         this.setSpawnDelay(0);
+        this.setMin(70);
+        this.setMax(80);
+    }
+
+    setMin(min) {
+        this.min = min;
+    }
+
+    getMin() {
+        return this.min;
+    }
+
+    setMax(max) {
+        this.max = max;
+    }
+
+    getMax() {
+        return this.max;
     }
 
     getSpecificObstacle(index) {
@@ -254,7 +270,7 @@ class ObstacleSpawner {
 getMainDimensions();
 
 let ground = new Element(0, 550, 50, mainWidth, '#ffdf70');
-let player = new Block(50, 0, 50, 50, '#ff4e4e', 1.5, 0, 18, ground, true);
+let player = new Block(50, 0, 50, 50, '#ff4e4e', 1.5, 0, 20, ground, true);
 let spawner = new ObstacleSpawner(ground);
 
 /* All game functions */
@@ -312,7 +328,8 @@ function update() {
     if(gameState == 1) {
         spawner.updateEachObstacle();
         player.collision(spawner);
-        if(player.getScore() > record) record = player.getScore();
+        if(score > record) record = score;
+        console.log(spawner.getMin());
     }
 }
 
@@ -326,19 +343,20 @@ function draw() {
     ctx.fillStyle = '#50beff';
     ctx.fillRect(0, 0, mainWidth, mainHeight);
     
-    drawText('white', '25px Droid Sans', 30, 70, 'Score: ' + player.getScore());
+    drawText('white', '25px Droid Sans', 30, 70, 'Score: ' + score);
     drawText('white', '25px Droid Sans', 30, 120, 'Record Score: ' + record);
 
     switch(gameState) {
         case 0:
-            drawText('green', 'italic normal bolder 25px Droid Sans', mainWidth/2 - 70, mainHeight/2 - 80, 'Runner Game');
-            drawText('green', 'italic normal bolder 25px Droid Sans', mainWidth/2 - 200, mainHeight/2 - 40, 'Press the left mouse button to start');
+            drawText('green', 'italic normal bolder 25px Droid Sans', mainWidth/2 - 80, mainHeight/2 - 80, 'Runner Game');
+            drawText('green', 'italic normal bolder 25px Droid Sans', mainWidth/2 - 210, mainHeight/2 - 40, 'Press the left mouse button to start');
             break;
         case 1:
             spawner.drawNewObstacle();
             break;
         case 2:
             drawText('red', 'italic normal bolder 25px Droid Sans', mainWidth/2 - 70, mainHeight/2 - 80, 'Game Over!');
+            drawText('red', 'italic normal bolder 25px Droid Sans', mainWidth/2 - 230, mainHeight/2 - 40, 'Press the left mouse button to continue');
             break;
         default:
             break;

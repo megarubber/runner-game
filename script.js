@@ -2,6 +2,15 @@ let canvas, ctx, mainHeight = window.innerHeight, mainWidth = window.innerWidth,
 const maxJumps = 3, speedBackground = 6;
 const colors = ['#ffbc1c', '#ff1c1c', '#ff85e1', '#52a7ff', '#78ff5d'];
 
+/*
+
+gameState variable
+0 == before playing
+1 == during the game
+2 == when the player loses
+
+*/
+
 class Element {
     constructor(x, y, height, width, color) {
         this.x = x;
@@ -58,13 +67,18 @@ class Element {
 }
 
 class Block extends Element {
-    constructor(x, y, height, width, color, gravity, speed, jumpForce, ground) {
+    constructor(x, y, height, width, color, gravity, speed, jumpForce, ground, existScore) {
         super(x, y, height, width, color);
         this.gravity = gravity;
         this.speed = speed;
         this.jumpForce = jumpForce;
         this.numJumps = 0;
         this.ground = ground;
+        this.startY = 20;
+        this.score = 0;
+
+        if(existScore != false)
+            this.existScore = existScore;
     }
 
     updateGravity() {
@@ -73,9 +87,10 @@ class Block extends Element {
     }
 
     isGrounded() {
-        if(this.getY() > this.getGround().getY() - this.getHeight()) {
+        if(this.getY() > this.getGround().getY() - this.getHeight() && gameState != 2) {
             this.setY(this.getGround().getY() - this.getHeight());
             this.setNumJumps(0);
+            this.setSpeed(0);
         }
     }
 
@@ -92,7 +107,30 @@ class Block extends Element {
             if(this.getX() < o.getX() + o.getWidth() && this.getX() + this.getWidth() >= o.getX() 
             && this.getY() + this.getHeight() >= this.getGround().getY() - o.getHeight())
                 gameState = 2;
+            else if(o.getX() == 0 && this.getExistScore()) this.setScore(this.getScore() + 1);
         }
+    }
+
+    reset() {
+        player.setSpeed(0);
+        player.setY(this.getStartY());
+        if(this.getExistScore()) this.setScore(0); 
+    }
+
+    getScore() {
+        return this.score;
+    }
+
+    setScore(score) {
+        this.score = score;
+    }
+
+    getExistScore() {
+        return this.existScore;
+    }
+
+    getStartY() {
+        return this.startY;
     }
 
     getSpeed() {
@@ -143,9 +181,9 @@ class ObstacleSpawner {
         this.spawnDelay = 0;
     }
 
-    spawnNewObstacle() {
+    spawnNewObstacle(width) {
         const newX = mainWidth;
-        const newWidth = 30 + Math.floor(21 * Math.random());
+        const newWidth = width;
         const newHeight = 30 + Math.floor(120 * Math.random());
         const newColor = colors[Math.floor(colors.length * Math.random())];
         let obstacle = new Element(newX, this.getGround().getY() - newHeight, newHeight, newWidth, newColor);
@@ -162,14 +200,13 @@ class ObstacleSpawner {
 
     updateEachObstacle() {
         if(this.getSpawnDelay() == 0)
-            this.spawnNewObstacle();
+            this.spawnNewObstacle(50);
         else
             this.setSpawnDelay(this.getSpawnDelay() - 1);
         
         for(let i = 0, len = this.getAllObstacles().length; i < len; i++) {
             let o = this.getSpecificObstacle(i);
             o.setX(o.getX() - speedBackground);
-
             if(o.getX() <= -o.getWidth()) {
                 this.getAllObstacles().splice(i, 1);
                 len--;
@@ -219,7 +256,7 @@ class ObstacleSpawner {
 getMainDimensions();
 
 let ground = new Element(0, 550, 50, mainWidth, '#ffdf70');
-let player = new Block(50, 0, 50, 50, '#ff4e4e', 1.5, 0, 18, ground);
+let player = new Block(50, 0, 50, 50, '#ff4e4e', 1.5, 0, 18, ground, true);
 let spawner = new ObstacleSpawner(ground);
 
 /* All game functions */
@@ -243,18 +280,12 @@ function main() { // oh no is c language
 
 function onClick() {
     //alert('you clicked')
-    switch(gameState) {
-        case 0:
-            gameState = 1;
-            break;
-        case 1:
-            player.jump();
-            break;
-        case 2:
-            gameState = 0;
-            break;
-        default:
-            break;
+    if(gameState == 0) gameState = 1;
+    else if(gameState == 1) player.jump();
+    else if(gameState = 2) {
+        gameState = 0;
+        spawner.deleteAll();
+        player.reset();
     }
 }
 
@@ -279,10 +310,11 @@ function update() {
     _frames++;
     player.updateGravity();
     player.isGrounded(ground);
+
     if(gameState == 1) {
         spawner.updateEachObstacle();
         player.collision(spawner);
-    } else spawner.deleteAll();
+    }
 }
 
 function drawState(color) {
@@ -290,10 +322,18 @@ function drawState(color) {
     ctx.fillRect(mainWidth / 2 - 50, mainHeight / 2 - 50, 100, 100);
 }
 
+function drawScore(color, font, x, y) {
+    ctx.fillStyle = color;
+    ctx.font = font;
+    ctx.fillText(player.getScore(), x, y);
+}
+
 function draw() {
     ctx.fillStyle = '#50beff';
     ctx.fillRect(0, 0, mainWidth, mainHeight);
     
+    drawScore('white', '50px Arial', 30, 68);
+
     switch(gameState) {
         case 0:
             drawState('green');
